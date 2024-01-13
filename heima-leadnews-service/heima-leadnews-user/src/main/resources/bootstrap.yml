@@ -1,5 +1,5 @@
 server:
-  port: 51801
+  port: 50801
 spring:
   application:
     name: leadnews-user

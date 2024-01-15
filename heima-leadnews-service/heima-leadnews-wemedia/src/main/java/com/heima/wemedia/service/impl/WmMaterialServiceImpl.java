@@ -116,4 +116,24 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 
+    /**
+     * 素材收藏
+     * @param id
+     * @return
+     */
+    @Override
+    public ResponseResult collectPicture(Integer id) {
+        WmMaterial wmMaterial = getById(id);
+        wmMaterial.setIsCollection((short) 1);
+        updateById(wmMaterial);
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ResponseResult cancelCollectPicture(Integer id) {
+        WmMaterial wmMaterial = getById(id);
+        wmMaterial.setIsCollection((short) 0);
+        updateById(wmMaterial);
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
 }

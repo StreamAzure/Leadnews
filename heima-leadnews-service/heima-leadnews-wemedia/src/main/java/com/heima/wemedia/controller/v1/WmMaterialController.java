@@ -35,4 +35,15 @@ public class WmMaterialController {
         return wmMaterialService.deletePicture(id);
     }
 
+    @GetMapping("/collect/{id}")
+    public ResponseResult collectPicture(@PathVariable Integer id){
+        log.info("collectPicture: {}", id);
+        return wmMaterialService.collectPicture(id);
+    }
+
+    @GetMapping("/cancel_collect/{id}")
+    public ResponseResult cancelCollectPicture(@PathVariable Integer id){
+        log.info("cancel collect picture: {}", id);
+        return wmMaterialService.cancelCollectPicture(id);
+    }
 }

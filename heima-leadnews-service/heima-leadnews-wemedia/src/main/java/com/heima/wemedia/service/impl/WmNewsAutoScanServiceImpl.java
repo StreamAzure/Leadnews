@@ -67,11 +67,13 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
                 throw new RuntimeException("WmNewsAutoScanServiceImpl-文章审核，保存app端相关文章数据失败");
             }
             //回填article_id
+            log.info("审核成功，回填 article_id");
             wmNews.setArticleId((Long) responseResult.getData());
             updateWmNews(wmNews,(short) 9,"审核成功");
         }
     }
 
+    @Qualifier("com.heima.apis.article.IArticleClient")
     @Autowired
     private IArticleClient articleClient;
 
@@ -86,6 +88,7 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
      * @param wmNews
      */
     private ResponseResult saveAppArticle(WmNews wmNews) {
+        log.info("审核完成，保存文章到APP");
 
         ArticleDto dto = new ArticleDto();
         //属性的拷贝

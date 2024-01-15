@@ -161,6 +161,29 @@ public class WmNewsServiceImpl  extends ServiceImpl<WmNewsMapper, WmNews> implem
         return ResponseResult.okResult(wmNews);
     }
 
+    @Override
+    public ResponseResult deleteNews(Integer id) {
+        removeById(id);
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ResponseResult downOrUpNews(WmNewsDto wmNewsDto) {
+        if(wmNewsDto.getId() == null){
+            return ResponseResult.errorResult(501, "文章ID不可缺少");
+        }
+        WmNews wmNews = getById(wmNewsDto.getId());
+        if(wmNews == null){
+            return ResponseResult.errorResult(1002, "文章不存在");
+        }
+        if(wmNews.getStatus() != 9){
+            return ResponseResult.errorResult(501, "当前文章不是发布状态，不能上下架");
+        }
+        wmNews.setEnable(wmNewsDto.getEnable());
+        updateById(wmNews);
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
     /**
      * 第一个功能：如果当前封面类型为自动，则设置封面类型的数据
      * 匹配规则：

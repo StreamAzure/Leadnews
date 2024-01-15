@@ -30,4 +30,17 @@ public class WmNewsController {
         log.info("查看文章详情： {}",id);
         return wmNewsService.detailNews(id);
     }
+
+    @GetMapping("/del_news/{id}")
+    public ResponseResult deleteNews(@PathVariable Integer id){
+        log.info("删除文章：{}", id);
+        return wmNewsService.deleteNews(id);
+    }
+
+    @PostMapping("/down_or_up")
+    public ResponseResult downOrUpNews(@RequestBody WmNewsDto wmNewsDto){
+        log.info("文章上下架: {}", wmNewsDto);
+        return wmNewsService.downOrUpNews(wmNewsDto);
+    }
+
 }

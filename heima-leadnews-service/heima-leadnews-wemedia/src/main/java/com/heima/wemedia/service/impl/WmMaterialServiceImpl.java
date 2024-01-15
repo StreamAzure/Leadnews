@@ -105,4 +105,15 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
         return responseResult;
     }
 
+    /**
+     * 素材图片删除
+     * @param id
+     * @return
+     */
+    @Override
+    public ResponseResult deletePicture(Integer id) {
+        removeById(id);
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
 }

@@ -148,6 +148,20 @@ public class WmNewsServiceImpl  extends ServiceImpl<WmNewsMapper, WmNews> implem
     }
 
     /**
+     * 显示文章详情
+     * @param id
+     * @return
+     */
+    @Override
+    public ResponseResult detailNews(Integer id) {
+        WmNews wmNews = getById(id);
+        if(wmNews == null){
+            return ResponseResult.errorResult(1002, "文章不存在");
+        }
+        return ResponseResult.okResult(wmNews);
+    }
+
+    /**
      * 第一个功能：如果当前封面类型为自动，则设置封面类型的数据
      * 匹配规则：
      * 1，如果内容图片大于等于1，小于3  单图  type 1

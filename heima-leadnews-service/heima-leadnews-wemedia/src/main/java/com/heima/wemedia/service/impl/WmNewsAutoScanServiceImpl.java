@@ -140,7 +140,15 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
         if(wmNews.getArticleId() != null){
             dto.setId(wmNews.getArticleId());
         }
-        dto.setCreatedTime(new Date());
+
+        Date date = new Date();
+
+        //若非定时发布，publish_time字段为空，而APP端查询文章又是看该字段的
+        //感觉是个BUG，这里修复一下
+        //如果publish_time字段为空，则设置为与 CreatedTime 同一时间
+        dto.setCreatedTime(date);
+        dto.setPublishTime(date);
+
 
         // Wemedia 服务 Feign 远程调用 Article 服务
         ResponseResult responseResult = articleClient.saveArticle(dto);

@@ -110,6 +110,7 @@ public class WmNewsServiceImpl  extends ServiceImpl<WmNewsMapper, WmNews> implem
      */
     @Override
     public ResponseResult submitNews(WmNewsDto dto) {
+        log.info("submitNews: {}", dto);
 
         //0.条件判断
         if(dto == null || dto.getContent() == null){

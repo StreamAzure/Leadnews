@@ -6,6 +6,7 @@ import com.heima.article.mapper.ApArticleConfigMapper;
 import com.heima.article.mapper.ApArticleContentMapper;
 import com.heima.article.mapper.ApArticleMapper;
 import com.heima.article.service.ApArticleService;
+import com.heima.article.service.ArticleFreemarkerService;
 import com.heima.common.constants.ArticleConstants;
 import com.heima.model.article.dtos.ArticleDto;
 import com.heima.model.article.dtos.ArticleHomeDto;
@@ -43,6 +44,9 @@ public class ApArticleServiceImpl  extends ServiceImpl<ApArticleMapper, ApArticl
     @Autowired
     private ApArticleContentMapper apArticleContentMapper;
 
+    @Autowired
+    private ArticleFreemarkerService articleFreemarkerService;
+
     /**
      * 根据参数加载文章列表
      * @param loadtype 1为加载更多  2为加载最新
@@ -72,6 +76,7 @@ public class ApArticleServiceImpl  extends ServiceImpl<ApArticleMapper, ApArticl
         if(dto.getMaxBehotTime() == null) dto.setMaxBehotTime(new Date());
         if(dto.getMinBehotTime() == null) dto.setMinBehotTime(new Date());
         //2.查询数据
+        log.info("App端加载文章，查询数据库DTO：{}", dto);
         List<ApArticle> apArticles = apArticleMapper.loadArticleList(dto, loadtype);
 
         //3.结果封装
@@ -122,6 +127,10 @@ public class ApArticleServiceImpl  extends ServiceImpl<ApArticleMapper, ApArticl
             apArticleContent.setContent(dto.getContent());
             apArticleContentMapper.updateById(apArticleContent);
         }
+
+        // 异步调用，生成静态文件上传到 minIO 中
+        articleFreemarkerService.buildArticleToMinIO(apArticle, dto.getContent());
+
         //3.结果返回  文章的id
         return ResponseResult.okResult(apArticle.getId());
     }

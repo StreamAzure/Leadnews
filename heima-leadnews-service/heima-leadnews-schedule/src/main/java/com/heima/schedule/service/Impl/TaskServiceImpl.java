@@ -46,6 +46,56 @@ public class TaskServiceImpl implements TaskService {
         return task.getTaskId();
     }
 
+    @Override
+    public boolean cancelTask(long taskId) {
+        boolean flag = false;
+
+        // 删除任务，更新任务日志
+        Task task = updateDb(taskId, ScheduleConstants.CANCELLED);
+        // 删除redis数据
+        if(task!=null){
+            removeTaskFromCache(task);
+            flag = true;
+        }
+        return false;
+    }
+
+    /**
+     * 删除Redis中的任务
+     * @param task
+     */
+    private void removeTaskFromCache(Task task) {
+        String key = task.getTaskType() + "_" + task.getPriority();
+        if(task.getExecuteTime() <= System.currentTimeMillis()){ // 如果任务在消费队列中
+            cacheService.lRemove(ScheduleConstants.TOPIC+key, 0, JSON.toJSONString(task));
+        }
+        else{ // 如果任务在未来数据队列中
+            cacheService.zRemove(ScheduleConstants.FUTURE+key, JSON.toJSONString(task));
+        }
+    }
+
+    private Task updateDb(long taskId, int status) {
+        Task task = null;
+        try {
+            // 删除原任务
+            taskinfoMapper.deleteById(taskId);
+
+            // 更新任务日志
+            TaskinfoLogs taskinfoLogs = taskinfoLogsMapper.selectById(taskId);
+            taskinfoLogs.setStatus(status);
+            taskinfoLogsMapper.updateById(taskinfoLogs);
+
+            // 替换为新任务
+            task = new Task();
+            BeanUtils.copyProperties(taskinfoLogs, task);
+            // Taskinfo中的executeTime字段和Task中的同名字段类型不同（Date和Long），需要手动复制过来
+            task.setExecuteTime(taskinfoLogs.getExecuteTime().getTime());
+        }catch (Exception e){
+            log.error("task cancel excption taskId={}", taskId);
+        }
+        return task;
+    }
+
     /**
      * 任务添加到Redis
      * @param task
@@ -90,7 +140,7 @@ public class TaskServiceImpl implements TaskService {
             TaskinfoLogs taskinfoLogs = new TaskinfoLogs();
             BeanUtils.copyProperties(taskinfo, taskinfoLogs);
             taskinfoLogs.setVersion(1);
-            taskinfoLogs.setStatus(ScheduleConstants.SCHEDULED);
+            taskinfoLogs.setStatus(ScheduleConstants.SCHEDULED); // 标记状态为等待执行
             taskinfoLogsMapper.insert(taskinfoLogs);
 
             flag = true;

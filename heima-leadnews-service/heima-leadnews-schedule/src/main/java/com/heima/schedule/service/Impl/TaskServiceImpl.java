@@ -13,11 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -78,6 +80,25 @@ public class TaskServiceImpl implements TaskService {
             log.error("poll task exception");
         }
         return task;
+    }
+
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void refresh() {
+        log.info("未来数据定时刷新--定时任务");
+        // 获取所有未来数据的集合 Key
+        Set<String> futureKeys = cacheService.scan(ScheduleConstants.FUTURE + "*");
+        for(String futureKey : futureKeys){
+            // 获取当前数据的 topic
+            String topicKey = ScheduleConstants.TOPIC + futureKey.split(ScheduleConstants.FUTURE)[1];
+
+            // 按照 key 和分值查询符合条件的数据
+            Set<String> tasks = cacheService.zRangeByScore(futureKey, 0, System.currentTimeMillis());
+            // 同步数据
+            if (!tasks.isEmpty()){
+                cacheService.refreshWithPipeline(futureKey, topicKey, tasks);
+                log.info("成功将"+ futureKey + "刷新到" + topicKey);
+            }
+        }
     }
 
 

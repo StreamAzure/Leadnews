@@ -1,6 +1,7 @@
 package com.heima.schedule.service.Impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.heima.common.constants.ScheduleConstants;
 import com.heima.common.redis.CacheService;
 import com.heima.model.schedule.dtos.Task;
@@ -16,9 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
+import javax.annotation.PostConstruct;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -82,7 +86,7 @@ public class TaskServiceImpl implements TaskService {
         return task;
     }
 
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")  //每分钟刷新一次
     public void refresh() {
         // 防止多个实例同时刷新：分布式锁
         String token  = cacheService.tryLock("FUTURE_TASK_SYNC", 1000*30); // 锁超时为30s
@@ -94,7 +98,6 @@ public class TaskServiceImpl implements TaskService {
             for(String futureKey : futureKeys){
                 // 获取当前数据的 topic
                 String topicKey = ScheduleConstants.TOPIC + futureKey.split(ScheduleConstants.FUTURE)[1];
-
                 // 按照 key 和分值查询符合条件的数据
                 Set<String> tasks = cacheService.zRangeByScore(futureKey, 0, System.currentTimeMillis());
                 // 同步数据
@@ -160,8 +163,10 @@ public class TaskServiceImpl implements TaskService {
         if(task.getExecuteTime() <= System.currentTimeMillis()){
             // 加入到消费队列
             cacheService.lLeftPush(ScheduleConstants.TOPIC + key, JSON.toJSONString(task));
+            log.info("任务加入到消费队列 list");
         } else if(task.getExecuteTime() <= nextScheduleTime){
             cacheService.zAdd(ScheduleConstants.FUTURE + key, JSON.toJSONString(task), task.getExecuteTime());
+            log.info("任务加入到未来任务队列 zset");
         }
     }
 
@@ -196,5 +201,40 @@ public class TaskServiceImpl implements TaskService {
             throw new RuntimeException("任务插入到DB时异常，手动抛出 RuntimeException 以便事务回滚");
         }
         return flag;
+    }
+
+
+    /**
+     * 数据库任务定时同步到Redis
+     */
+    @PostConstruct // 微服务一启动就先执行一次
+    @Scheduled(cron = "0 */5 * * * ?")
+    public void reloadData(){
+        // 1. 清空缓存中的数据（list 和 zset）
+        clearCache();
+        // 2. 查询符合条件的任务：小于未来5分钟的数据（包括小于当前时间需要立即执行的）
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 5);
+        List<Taskinfo> taskinfoList = taskinfoMapper.selectList(Wrappers.<Taskinfo>lambdaQuery().lt(Taskinfo::getExecuteTime, calendar.getTime()));
+        // 3. 将任务添加到 Redis 的 zset 中
+        if(taskinfoList!=null && taskinfoList.size() > 0){
+            for (Taskinfo taskinfo : taskinfoList){
+                Task task = new Task();
+                BeanUtils.copyProperties(taskinfo, task);
+                task.setExecuteTime(taskinfo.getExecuteTime().getTime());
+                addTaskToCache(task);
+            }
+        }
+        log.info("数据库任务已同步到Redis");
+    }
+
+    /**
+     * 清空缓存
+     */
+    public void clearCache(){
+        Set<String> topicKeys = cacheService.scan(ScheduleConstants.TOPIC + "*");
+        Set<String> futureKeys = cacheService.scan(ScheduleConstants.FUTURE + "*");
+        cacheService.delete(topicKeys);
+        cacheService.delete(futureKeys);
     }
 }

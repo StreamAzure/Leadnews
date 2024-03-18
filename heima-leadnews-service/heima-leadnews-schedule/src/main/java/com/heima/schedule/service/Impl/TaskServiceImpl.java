@@ -84,19 +84,24 @@ public class TaskServiceImpl implements TaskService {
 
     @Scheduled(cron = "0 */1 * * * ?")
     public void refresh() {
-        log.info("未来数据定时刷新--定时任务");
-        // 获取所有未来数据的集合 Key
-        Set<String> futureKeys = cacheService.scan(ScheduleConstants.FUTURE + "*");
-        for(String futureKey : futureKeys){
-            // 获取当前数据的 topic
-            String topicKey = ScheduleConstants.TOPIC + futureKey.split(ScheduleConstants.FUTURE)[1];
+        // 防止多个实例同时刷新：分布式锁
+        String token  = cacheService.tryLock("FUTURE_TASK_SYNC", 1000*30); // 锁超时为30s
+        if(StringUtils.isNotBlank(token)){
+            // 获得锁成功
+            log.info("未来数据定时刷新--定时任务");
+            // 获取所有未来数据的集合 Key
+            Set<String> futureKeys = cacheService.scan(ScheduleConstants.FUTURE + "*");
+            for(String futureKey : futureKeys){
+                // 获取当前数据的 topic
+                String topicKey = ScheduleConstants.TOPIC + futureKey.split(ScheduleConstants.FUTURE)[1];
 
-            // 按照 key 和分值查询符合条件的数据
-            Set<String> tasks = cacheService.zRangeByScore(futureKey, 0, System.currentTimeMillis());
-            // 同步数据
-            if (!tasks.isEmpty()){
-                cacheService.refreshWithPipeline(futureKey, topicKey, tasks);
-                log.info("成功将"+ futureKey + "刷新到" + topicKey);
+                // 按照 key 和分值查询符合条件的数据
+                Set<String> tasks = cacheService.zRangeByScore(futureKey, 0, System.currentTimeMillis());
+                // 同步数据
+                if (!tasks.isEmpty()){
+                    cacheService.refreshWithPipeline(futureKey, topicKey, tasks);
+                    log.info("成功将"+ futureKey + "刷新到" + topicKey);
+                }
             }
         }
     }
@@ -133,7 +138,7 @@ public class TaskServiceImpl implements TaskService {
             // Taskinfo中的executeTime字段和Task中的同名字段类型不同（Date和Long），需要手动复制过来
             task.setExecuteTime(taskinfoLogs.getExecuteTime().getTime());
         }catch (Exception e){
-            log.error("task cancel excption taskId={}", taskId);
+            log.error("task cancel exception taskId={}", taskId);
         }
         return task;
     }

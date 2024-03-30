@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heima.common.constants.WemediaConstants;
+import com.heima.common.constants.WmNewsMessageConstants;
 import com.heima.common.exception.CustomException;
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
@@ -29,13 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +47,9 @@ public class WmNewsServiceImpl  extends ServiceImpl<WmNewsMapper, WmNews> implem
 
     @Autowired
     private WmNewsTaskService wmNewsTaskService;
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     /**
      * 查询文章
@@ -193,7 +195,12 @@ public class WmNewsServiceImpl  extends ServiceImpl<WmNewsMapper, WmNews> implem
             return ResponseResult.errorResult(501, "当前文章不是发布状态，不能上下架");
         }
         wmNews.setEnable(wmNewsDto.getEnable());
-        updateById(wmNews);
+        updateById(wmNews); // Wemedia自媒体后台的文章状态更新
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("articleId", wmNews.getArticleId());
+        map.put("enable", wmNews.getEnable());
+        kafkaTemplate.send(WmNewsMessageConstants.WM_NEWS_UP_OR_DOWN_TOPIC, JSON.toJSONString(map)); // 通过 Kafka 通知APP端
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 

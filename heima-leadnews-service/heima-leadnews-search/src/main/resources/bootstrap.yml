@@ -1,12 +1,12 @@
 server:
-  port: 51804
+  port: 52816
 spring:
   application:
     name: leadnews-search
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.200.130:8848
+        server-addr: localhost:6848
       config:
-        server-addr: 192.168.200.130:8848
+        server-addr: localhost:6848
         file-extension: yml

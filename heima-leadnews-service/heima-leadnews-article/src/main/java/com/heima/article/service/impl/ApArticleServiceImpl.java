@@ -129,6 +129,7 @@ public class ApArticleServiceImpl  extends ServiceImpl<ApArticleMapper, ApArticl
         }
 
         // 异步调用，生成静态文件上传到 minIO 中
+        // 生成的静态URL，还需要加入到ES中供searchService使用，所以在内部发消息
         articleFreemarkerService.buildArticleToMinIO(apArticle, dto.getContent());
 
         //3.结果返回  文章的id

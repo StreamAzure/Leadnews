@@ -12,6 +12,7 @@
         <module>freemarker-demo</module>
         <module>minIO-demo</module>
         <module>es-init</module>
+        <module>mongo-demo</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
 

@@ -1,7 +1,11 @@
 package com.heima.search.service.impl;
 
+import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.common.enums.AppHttpCodeEnum;
+import com.heima.model.user.pojos.ApUser;
 import com.heima.search.pojos.ApUserSearch;
 import com.heima.search.service.ApUserSearchService;
+import com.heima.utils.thread.AppThreadLocalUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,5 +58,21 @@ public class ApUserSearchServiceImpl implements ApUserSearchService {
             ApUserSearch lastUserSearch = apUserSearchList.get(apUserSearchList.size() - 1);
             mongoTemplate.findAndReplace(Query.query(Criteria.where("id").is(lastUserSearch.getId())),apUserSearch);
         }
+    }
+
+    @Override
+    public ResponseResult findUserSearch() {
+        // 获取当前用户
+        ApUser apUser = AppThreadLocalUtils.getUser();
+        if(apUser == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+
+        // 根据用户名查询数据，并按时间倒序
+        List<ApUserSearch> apUserSearches = mongoTemplate.find(Query.query(Criteria.where("userId")
+                        .is(apUser.getId()))
+                .with(Sort.by(Sort.Direction.DESC, "createdTime")), ApUserSearch.class);
+
+        return  ResponseResult.okResult(apUserSearches);
     }
 }

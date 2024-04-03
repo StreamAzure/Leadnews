@@ -15,12 +15,13 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/article/search")
 @Slf4j
-public class SearchController {
+public class ArticleSearchController {
 
     @Autowired
     private ArticleSearchService articleSearchService;
     @PostMapping("/search")
     public ResponseResult search(@RequestBody UserSearchDto userSearchDto){
+        log.info("/api/v1/article/search/search");
         try {
             return articleSearchService.search(userSearchDto);
         } catch (IOException e) {

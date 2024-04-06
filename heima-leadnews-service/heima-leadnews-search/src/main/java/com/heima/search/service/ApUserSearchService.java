@@ -1,6 +1,7 @@
 package com.heima.search.service;
 
 import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.search.dtos.HistorySearchDto;
 
 public interface ApUserSearchService {
 
@@ -16,4 +17,6 @@ public interface ApUserSearchService {
      * @return
      */
     public ResponseResult findUserSearch();
+
+    public ResponseResult delUserSearch(HistorySearchDto historySearchDto);
 }

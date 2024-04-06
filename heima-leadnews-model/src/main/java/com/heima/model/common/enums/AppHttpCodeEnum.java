@@ -27,7 +27,9 @@ public enum AppHttpCodeEnum {
     NO_OPERATOR_AUTH(3000,"无权限操作"),
     NEED_ADMIND(3001,"需要管理员权限"),
 
-    MATERIASL_REFERENCE_FAIL(4001, "素材失效" );
+    MATERIASL_REFERENCE_FAIL(4001, "素材失效" ),
+    AD_USER_NAME_NOT_EXIST(2001, "管理员用户名不存在"),
+    USERNAME_PASSWORD_REQUIRE(2002, "用户名和密码不能为空！");
 
     int code;
     String errorMessage;

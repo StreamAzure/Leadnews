@@ -18,6 +18,8 @@
         <module>heima-leadnews-gateway</module>
         <module>heima-leadnews-test</module>
         <module>heima-leadnews-test/kafka-demo</module>
+        <module>heima-leadnews-service/heima-leadnews-admin</module>
+        <module>heima-leadnews-gateway/heima-leadnews-admin-gateway</module>
     </modules>
 
     <!-- 继承Spring boot工程 -->

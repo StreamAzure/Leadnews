@@ -9,6 +9,7 @@ import com.heima.wemedia.service.WmChannelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +28,7 @@ public class WemediaClient implements IWemediaClient {
     }
 
     @Override
+    @GetMapping("/api/v1/channel/del/{id}")
     public ResponseResult delChannel(Integer id) {
         log.info("Wemdia 微服务被远程调用：Feign delChannel: {}", id);
         return wmChannelService.delChannel(id);

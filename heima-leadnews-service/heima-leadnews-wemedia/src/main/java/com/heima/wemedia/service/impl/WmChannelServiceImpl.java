@@ -56,7 +56,7 @@ public class WmChannelServiceImpl extends ServiceImpl<WmChannelMapper, WmChannel
             return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
         }
         else{
-            return ResponseResult.errorResult(AppHttpCodeEnum.NO_OPERATOR_AUTH);
+            return ResponseResult.errorResult(AppHttpCodeEnum.CHANNEL_ENABLE);
         }
     }
 

@@ -30,7 +30,8 @@ public enum AppHttpCodeEnum {
     MATERIASL_REFERENCE_FAIL(4001, "素材失效" ),
     AD_USER_NAME_NOT_EXIST(2001, "管理员用户名不存在"),
     USERNAME_PASSWORD_REQUIRE(2002, "用户名和密码不能为空！"),
-    CHANNEL_NEWS_EXISTS(2003, "该频道下还有文章，无法禁用");
+    CHANNEL_NEWS_EXISTS(2003, "该频道下还有文章，无法禁用"),
+    CHANNEL_ENABLE(2004, "删除失败，频道必须为禁用状态");
 
     int code;
     String errorMessage;

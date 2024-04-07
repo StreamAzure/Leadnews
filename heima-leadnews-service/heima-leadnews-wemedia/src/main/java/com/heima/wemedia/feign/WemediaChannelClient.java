@@ -1,21 +1,20 @@
 package com.heima.wemedia.feign;
 
-import com.heima.apis.article.IWemediaClient;
+import com.heima.apis.wemedia.IWemediaChannelClient;
 import com.heima.model.admin.dtos.AdChannel;
 import com.heima.model.admin.dtos.ChannelDto;
+import com.heima.model.admin.dtos.SensitiveDto;
 import com.heima.model.common.dtos.ResponseResult;
-import com.heima.model.wemedia.pojos.WmChannel;
 import com.heima.wemedia.service.WmChannelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
-public class WemediaClient implements IWemediaClient {
+public class WemediaChannelClient implements IWemediaChannelClient {
 
     @Autowired
     private WmChannelService wmChannelService;

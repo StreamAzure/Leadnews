@@ -73,6 +73,7 @@ public class WmChannelServiceImpl extends ServiceImpl<WmChannelMapper, WmChannel
             log.info("禁用频道，检查频道下是否还有文章");
             if (wmNewsList == null || wmNewsList.isEmpty()) {
                 BeanUtils.copyProperties(adChannel, newWmChannel);
+                updateById(newWmChannel);
                 return ResponseResult.okResult(newWmChannel);
             } else {
                 return ResponseResult.errorResult(AppHttpCodeEnum.CHANNEL_NEWS_EXISTS);
@@ -82,5 +83,14 @@ public class WmChannelServiceImpl extends ServiceImpl<WmChannelMapper, WmChannel
         updateById(newWmChannel);
         log.info("频道更新成功");
         return ResponseResult.okResult(newWmChannel);
+    }
+
+    @Override
+    public ResponseResult saveChannel(AdChannel adChannel) {
+        if(adChannel == null) return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_REQUIRE);
+        WmChannel wmChannel = new WmChannel();
+        BeanUtils.copyProperties(adChannel, wmChannel);
+        save(wmChannel);
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 }

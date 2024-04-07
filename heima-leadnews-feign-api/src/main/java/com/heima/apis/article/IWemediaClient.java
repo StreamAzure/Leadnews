@@ -21,4 +21,7 @@ public interface IWemediaClient {
 
     @PostMapping("/api/v1/channel/update")
     ResponseResult updateChannel(@RequestBody AdChannel adChannel);
+
+    @PostMapping("/api/v1/channel/save")
+    ResponseResult saveChannel(@RequestBody AdChannel adChannel);
 }

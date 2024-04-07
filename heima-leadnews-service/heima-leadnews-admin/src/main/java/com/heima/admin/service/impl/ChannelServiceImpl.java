@@ -36,4 +36,9 @@ public class ChannelServiceImpl implements ChannelService {
         log.info("修改频道");
         return wemediaClient.updateChannel(adChannel);
     }
+
+    @Override
+    public ResponseResult saveChannel(AdChannel adChannel) {
+        return wemediaClient.saveChannel(adChannel);
+    }
 }

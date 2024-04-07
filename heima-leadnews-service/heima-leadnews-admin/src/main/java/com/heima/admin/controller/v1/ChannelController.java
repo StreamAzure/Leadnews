@@ -34,4 +34,10 @@ public class ChannelController {
         log.info("修改频道:{}", adChanel);
         return channelService.updateChannel(adChanel);
     }
+
+    @PostMapping("/save")
+    public ResponseResult saveChannel(@RequestBody AdChannel adChannel){
+        log.info("新增频道：{}", adChannel);
+        return channelService.saveChannel(adChannel);
+    }
 }

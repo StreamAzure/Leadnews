@@ -19,4 +19,6 @@ public interface WmChannelService extends IService<WmChannel> {
 
 
     ResponseResult updateChannel(AdChannel adChannel);
+
+    ResponseResult saveChannel(AdChannel adChannel);
 }

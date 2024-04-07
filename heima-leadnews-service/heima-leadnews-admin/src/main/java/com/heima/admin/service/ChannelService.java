@@ -11,4 +11,6 @@ public interface ChannelService {
     ResponseResult listChannel(ChannelDto channelDto);
 
     ResponseResult updateChannel(AdChannel adChannel);
+
+    ResponseResult saveChannel(AdChannel adChannel);
 }

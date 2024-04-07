@@ -38,4 +38,11 @@ public class WemediaClient implements IWemediaClient {
         log.info("Wemdia 微服务被远程调用：Feign updateChannel: {}", adChannel);
         return wmChannelService.updateChannel(adChannel);
     }
+
+    @Override
+    @PostMapping("/api/v1/channel/save")
+    public ResponseResult saveChannel(AdChannel adChannel) {
+        log.info("Wemdia 微服务被远程调用：Feign saveChannel: {}", adChannel);
+        return wmChannelService.saveChannel(adChannel);
+    }
 }

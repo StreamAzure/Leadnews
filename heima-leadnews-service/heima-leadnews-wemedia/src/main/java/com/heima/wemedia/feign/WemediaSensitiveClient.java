@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/sensitive")
@@ -42,9 +43,19 @@ public class WemediaSensitiveClient implements IWemediaSensitiveClient {
     public ResponseResult saveSensitive(WmSensitive wmSensitive) {
         log.info("Wemedia 微服务被远程调用：Feign saveSensitive: {}", wmSensitive);
         if(wmSensitive == null) return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_REQUIRE);
-        wmSensitive.setCreatedTime(new Date());
-        wmSensitiveMapper.insert(wmSensitive);
-        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+        // 检查敏感词是否已存在
+        LambdaQueryWrapper<WmSensitive> queryWrapper = new LambdaQueryWrapper<>();
+        // 设置查询条件，这里以敏感词word字段为例
+        queryWrapper.eq(WmSensitive::getSensitives, wmSensitive.getSensitives());
+        List<WmSensitive> wmSensitives = wmSensitiveMapper.selectList(queryWrapper);
+        if(wmSensitives == null || wmSensitives.isEmpty()){
+            wmSensitive.setCreatedTime(new Date());
+            wmSensitiveMapper.insert(wmSensitive);
+            return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+        }
+        else{
+            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_EXIST);
+        }
     }
 
     @Override

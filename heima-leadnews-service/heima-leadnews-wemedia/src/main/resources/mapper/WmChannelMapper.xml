@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heima.wemedia.mapper.WmChannelMapper">
+
+    <select id="selectNewsByChannelId" resultType="com.heima.model.wemedia.pojos.WmNews">
+        SELECT * FROM wm_news WHERE channel_id = #{channelId}
+    </select>
+
+</mapper>
